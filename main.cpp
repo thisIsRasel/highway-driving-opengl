@@ -2,16 +2,17 @@
 #include <GL/glut.h>
 #include <stdlib.h>
 #include <iostream>
+#include <time.h>
 
-#define WINDOW_WIDTH 600
-#define WINDOW_HEIGHT 640
+#define WINDOW_WIDTH 480
+#define WINDOW_HEIGHT 660
 
-#define DIM_X 50
+#define DIM_X 100
 #define DIM_Y 500
 
-#define ROAD_WIDTH 20
+#define ROAD_WIDTH 35
 
-#define FPS 100
+#define FPS 200
 
 using namespace std;
 
@@ -21,22 +22,31 @@ struct GameObject {
     int width, height;
 };
 
-GameObject road = {
-    DIM_X / 2, DIM_Y / 2, 
-    ROAD_WIDTH, DIM_Y};
+int getLeft(GameObject);
+int getRight(GameObject);
+int getDown(GameObject);
+int getTop(GameObject);
+
+GameObject road = { DIM_X / 2, DIM_Y / 2, ROAD_WIDTH, DIM_Y};
     
-GameObject car = { 20, 100, 5, 40};
+GameObject car = { 40, 100, 6, 40};
 
-GameObject obstacle1 = {18, -50, 5, 50};
+GameObject obstacle1 = {40, -50, 6, 50};
 
-GameObject obstacle2 = {24, -50, 5, 50};
+GameObject obstacle2 = {50, -50, 6, 50};
 
-GameObject obstacle3 = {30, -50, 5, 50};
+GameObject obstacle3 = {60, -50, 6, 50};
 
+int roadLineLeft = getLeft(road) + 1;
+int roadLineRight = getRight(road) - 1;
+int roadLineDown = getDown(road);
+int roadLineTop = getTop(road);
+int roadLineWidth = 1;
+
+int start = 0, rsIndex = 0;
 int r = 0;
 int count = 0;
 bool o1 = true, o2 = false, o3 = false;
-
 
 static void resize(int width, int height)
 {
@@ -47,9 +57,6 @@ static void resize(int width, int height)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity() ;
 }
-
-int index = 0;
-int rsIndex = 0;
 
 int getLeft(GameObject object) {
     return object.centerX - object.width / 2;
@@ -112,7 +119,7 @@ void collisionDetection() {
 
     if(doesCollide(car, obstacle1) || doesCollide(car, obstacle2) || doesCollide(car, obstacle3)) {
         cout<<"Collision"<<endl;
-        exit(0);
+        //exit(0);
     } else {
         cout<<"No collision"<<endl;
     }
@@ -122,30 +129,50 @@ static void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glColor3f (0.67, 0.67, 0.67);
-    
     // Drawing road
+    glColor3f (0.42, 0.42, 0.42);
     drawObject(road);
     
+    // Drawing road side line
+    glColor3f(0.8, 0.46, 0.0);
+    
+    glBegin(GL_POLYGON);
+        glVertex2i(roadLineLeft, roadLineDown);
+        glVertex2i(roadLineLeft, roadLineTop);
+        glVertex2i(roadLineLeft + roadLineWidth, roadLineTop);
+        glVertex2i(roadLineLeft + roadLineWidth, roadLineDown);
+    glEnd();
+    
+    glBegin(GL_POLYGON);
+        glVertex2i(roadLineRight, roadLineDown);
+        glVertex2i(roadLineRight, roadLineTop);
+        glVertex2i(roadLineRight - roadLineWidth, roadLineTop);
+        glVertex2i(roadLineRight - roadLineWidth, roadLineDown);
+    glEnd();
+    
     // Drawing road seperator
+    glColor3f(0.87, 0.87, 0.87);
+    int roadSeperatorWidth = 1;
     
-    /*glColor3f(1, 1, 1);
-    int road_seperator_width = 20;
-    int road_seperator_height = (WINDOW_HEIGHT - 100) / 3;
-    int road_seperator_left = WINDOW_WIDTH/2 - road_seperator_width/2;
+    start--;
     
-    for(int i=1; i<=3; i++) {
-    
-        glBegin(GL_POLYGON);
-            glVertex2i(road_seperator_left, 0 - rsIndex);
-            glVertex2i(road_seperator_left, road_seperator_height - rsIndex);
-            glVertex2i(road_seperator_left + road_seperator_width, road_seperator_height - rsIndex);
-            glVertex2i(road_seperator_left + road_seperator_width, 0 - rsIndex);
-        glEnd();
-    
+    if( start < -120) {
+        start = 0;
     }
     
-    rsIndex++;*/
+    rsIndex = start;
+    
+    for(int i=1; i<6; i++) {
+        
+        glBegin(GL_POLYGON);
+            glVertex2i(road.centerX - roadSeperatorWidth, rsIndex);
+            glVertex2i(road.centerX - roadSeperatorWidth, rsIndex + 100);
+            glVertex2i(road.centerX + roadSeperatorWidth, rsIndex + 100);
+            glVertex2i(road.centerX + roadSeperatorWidth, rsIndex);
+        glEnd();
+        
+        rsIndex += 120;
+    }
     
     glColor3f (1.0, 0.0, 0.0);
     drawObject(car);
@@ -154,8 +181,9 @@ static void display(void)
     
     if(count == 150) {
     
+        srand ( time(NULL) );
         r = rand() % 3;
-        cout << r<<endl;
+        //cout << "Time = " << r<<endl;
         
         if( r == 0) {
             o1 = true;
@@ -281,7 +309,7 @@ int main(int argc, char *argv[])
     glutSpecialFunc(catchKey);
     
     gluOrtho2D(0.0, DIM_X, 0.0, DIM_Y);
-    glClearColor(0, 1, 0, 0);
+    glClearColor(0.35, 0.64, 0.17, 0);
     
     glutMainLoop();
 
