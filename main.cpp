@@ -6,14 +6,11 @@
 #include "SOIL.h"
 
 #define WINDOW_WIDTH 480
-#define WINDOW_HEIGHT 660
+#define WINDOW_HEIGHT 640
 
 #define DIM_X 100
 #define DIM_Y 500
-
 #define ROAD_WIDTH 35
-
-#define FPS 500
 
 using namespace std;
 
@@ -28,15 +25,15 @@ int getRight(GameObject);
 int getDown(GameObject);
 int getTop(GameObject);
 
-GameObject road = { DIM_X / 2, DIM_Y / 2, ROAD_WIDTH, DIM_Y};
+GameObject road = {DIM_X / 2, DIM_Y / 2, ROAD_WIDTH, DIM_Y};
     
-GameObject car = { 40, 100, 6, 40};
+GameObject car = {40, 100, 6, 40};
 
-GameObject obstacle1 = {40, -50, 6, 40};
+GameObject obstacle1 = {40, -50, 6, 30};
 
-GameObject obstacle2 = {50, -50, 6, 40};
+GameObject obstacle2 = {50, -50, 6, 30};
 
-GameObject obstacle3 = {60, -50, 6, 40};
+GameObject obstacle3 = {60, -50, 6, 30};
 
 int roadLineLeft = getLeft(road) + 1;
 int roadLineRight = getRight(road) - 1;
@@ -44,10 +41,11 @@ int roadLineDown = getDown(road);
 int roadLineTop = getTop(road);
 int roadLineWidth = 1;
 
-int start = 0, rsIndex = 0;
-int r = 0;
-int count = 0;
-bool o1 = true, o2 = false, o3 = false;
+int start = 0, rsIndex = 0, score = 0, FPS = 300, speedIncrease = 0;
+int random = 0, count = 0;
+bool obstacle1Active = false, obstacle2Active = false, obstacle3Active = false;
+
+GLuint tex_ID = 0;
 
 int getLeft(GameObject object) {
     return object.centerX - object.width / 2;
@@ -129,7 +127,7 @@ static void resize(int width, int height)
 static void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT);
-
+    
     // Drawing road
     glColor3f (0.42, 0.42, 0.42);
     drawObject(road);
@@ -157,52 +155,53 @@ static void display(void)
     
     start--;
     
-    if( start < -120) {
+    if( start < -160) {
         start = 0;
     }
     
     rsIndex = start;
     
-    for(int i=1; i<6; i++) {
+    for(int i=1; i<5; i++) {
         
         glBegin(GL_POLYGON);
             glVertex2i(road.centerX - roadSeperatorWidth, rsIndex);
-            glVertex2i(road.centerX - roadSeperatorWidth, rsIndex + 100);
-            glVertex2i(road.centerX + roadSeperatorWidth, rsIndex + 100);
+            glVertex2i(road.centerX - roadSeperatorWidth, rsIndex + 130);
+            glVertex2i(road.centerX + roadSeperatorWidth, rsIndex + 130);
             glVertex2i(road.centerX + roadSeperatorWidth, rsIndex);
         glEnd();
         
-        rsIndex += 120;
+        rsIndex += 160;
     }
     
     // Drawing car
-    
-    GLuint tex_ID;
-    tex_ID = SOIL_load_OGL_texture(
-			"car.png",
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
-    );
-    
-    glColor3f (1.0, 0.0, 0.0);
-    //drawObject(car);
-    
     int left, right, down, top;
+    
+    if(tex_ID == 0) {
+    
+        tex_ID = SOIL_load_OGL_texture(
+                "car.png",
+                SOIL_LOAD_AUTO,
+                SOIL_CREATE_NEW_ID,
+                SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+        );
+        
+        glColor3f (1.0, 0.0, 0.0);
+        //drawObject(car);
+        
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, tex_ID);
+    }
     
     left = getLeft(car);
     right = getRight(car);
     down = getDown(car);
     top = getTop(car);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, tex_ID);
 
+    glEnable(GL_TEXTURE_2D);
+    
     glBegin(GL_POLYGON);
         glTexCoord2d(0, 0); glVertex2i(left, down);
         glTexCoord2d(0, 1); glVertex2i(left, top);
@@ -217,24 +216,22 @@ static void display(void)
     if(count == 150) {
     
         srand ( time(NULL) );
-        r = rand() % 3;
+        random = rand() % 3;
         //cout << "Time = " << r<<endl;
         
-        if( r == 0) {
-            o1 = true;
-        }else if(r == 1) {
-            o2 = true;
-        }else if(r == 2) {
-            o3 = true;
+        if( random == 0) {
+            obstacle1Active = true;
+        }else if(random == 1) {
+            obstacle2Active = true;
+        }else if(random == 2) {
+            obstacle3Active = true;
         }
         count = 0;
     }
     
     glColor3f (1.0, 1.0, 0.0);
     
-    
-    
-    if(o1) {
+    if(obstacle1Active) {
     
         drawObject(obstacle1);
         
@@ -242,12 +239,12 @@ static void display(void)
         
         if(obstacle1.centerY < 0 ) {
             obstacle1.centerY = DIM_Y;
-            o1 = false;
+            obstacle1Active = false;
         }
         
     }
     
-    if(o2) {
+    if(obstacle2Active) {
     
         drawObject(obstacle2);
         
@@ -255,12 +252,12 @@ static void display(void)
         
         if(obstacle2.centerY < 0 ) {
             obstacle2.centerY = DIM_Y;
-            o2 = false;
+            obstacle2Active = false;
         }
         
     }
     
-    if(o3) {
+    if(obstacle3Active) {
         
         drawObject(obstacle3);
     
@@ -268,13 +265,33 @@ static void display(void)
         
         if(obstacle3.centerY < 0 ) {
             obstacle3.centerY = DIM_Y;
-            o3 = false;
+            obstacle3Active = false;
         }
         
     }
     
     collisionDetection();
-	    
+    
+    // Score
+    score++;
+    
+    int s = score, i = 0, x = DIM_X - 5;
+    while(s != 0) {
+        
+        glRasterPos2d(x , DIM_Y - 20);
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, ('0' + (s % 10)));
+        s = s / 10; 
+        x-=3;
+    }
+    
+    // Game Difficulty
+    if(speedIncrease != (score / 1000)) {
+    
+        speedIncrease = score / 1000;
+        FPS += speedIncrease;
+        
+    }
+    
     glutSwapBuffers();
 }
 
@@ -282,19 +299,6 @@ void timer(int) {
 
     glutPostRedisplay();
     glutTimerFunc(1000/FPS, timer, 0);
-}
-
-static void key(unsigned char key, int x, int y)
-{
-    switch (key)
-    {
-        case 27 :
-        case 'q':
-            exit(0);
-            break;
-    }
-
-    glutPostRedisplay();
 }
 
 void catchKey(int key, int x, int y) {
@@ -320,11 +324,6 @@ void catchKey(int key, int x, int y) {
     glutPostRedisplay();
 }
 
-static void idle(void)
-{
-    glutPostRedisplay();
-}
-
 /* Program entry point */
 
 int main(int argc, char *argv[])
@@ -334,13 +333,11 @@ int main(int argc, char *argv[])
     glutInitWindowPosition(10,10);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 
-    glutCreateWindow("Car Driving");
+    glutCreateWindow("Highway Driving");
 
     glutDisplayFunc(display);
     glutReshapeFunc(resize);
     glutTimerFunc(0, timer, 0);
-    //glutIdleFunc(idle);
-    //glutKeyboardFunc(key);
     glutSpecialFunc(catchKey);
     
     gluOrtho2D(0.0, DIM_X, 0.0, DIM_Y);
