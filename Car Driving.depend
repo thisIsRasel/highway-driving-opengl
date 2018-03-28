@@ -1,10 +1,11 @@
 # depslib dependency file v1.0
-1522253748 source:f:\car driving\main.cpp
+1522256430 source:f:\car driving\main.cpp
 	<GL/gl.h>
 	<GL/glut.h>
 	<stdlib.h>
 	<iostream>
 	<time.h>
+	"SOIL.h"
 
 1517164928 c:\program files (x86)\codeblocks\mingw\include\gl\glut.h
 	"freeglut_std.h"
@@ -230,4 +231,6 @@
 1250308680 c:\program files (x86)\codeblocks\mingw\include\time.h
 	<_mingw.h>
 	<stddef.h>
+
+1215432808 c:\program files (x86)\codeblocks\mingw\include\soil.h
 

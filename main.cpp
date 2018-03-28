@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <time.h>
+#include "SOIL.h"
 
 #define WINDOW_WIDTH 480
 #define WINDOW_HEIGHT 660
@@ -12,7 +13,7 @@
 
 #define ROAD_WIDTH 35
 
-#define FPS 200
+#define FPS 500
 
 using namespace std;
 
@@ -31,11 +32,11 @@ GameObject road = { DIM_X / 2, DIM_Y / 2, ROAD_WIDTH, DIM_Y};
     
 GameObject car = { 40, 100, 6, 40};
 
-GameObject obstacle1 = {40, -50, 6, 50};
+GameObject obstacle1 = {40, -50, 6, 40};
 
-GameObject obstacle2 = {50, -50, 6, 50};
+GameObject obstacle2 = {50, -50, 6, 40};
 
-GameObject obstacle3 = {60, -50, 6, 50};
+GameObject obstacle3 = {60, -50, 6, 40};
 
 int roadLineLeft = getLeft(road) + 1;
 int roadLineRight = getRight(road) - 1;
@@ -47,16 +48,6 @@ int start = 0, rsIndex = 0;
 int r = 0;
 int count = 0;
 bool o1 = true, o2 = false, o3 = false;
-
-static void resize(int width, int height)
-{
-    glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0, DIM_X, 0, DIM_Y);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity() ;
-}
 
 int getLeft(GameObject object) {
     return object.centerX - object.width / 2;
@@ -119,10 +110,20 @@ void collisionDetection() {
 
     if(doesCollide(car, obstacle1) || doesCollide(car, obstacle2) || doesCollide(car, obstacle3)) {
         cout<<"Collision"<<endl;
-        //exit(0);
+        exit(0);
     } else {
         cout<<"No collision"<<endl;
     }
+}
+
+static void resize(int width, int height)
+{
+    glViewport(0, 0, width, height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, DIM_X, 0, DIM_Y);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity() ;
 }
 
 static void display(void)
@@ -174,8 +175,42 @@ static void display(void)
         rsIndex += 120;
     }
     
+    // Drawing car
+    
+    GLuint tex_ID;
+    tex_ID = SOIL_load_OGL_texture(
+			"car.png",
+			SOIL_LOAD_AUTO,
+			SOIL_CREATE_NEW_ID,
+			SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+    );
+    
     glColor3f (1.0, 0.0, 0.0);
-    drawObject(car);
+    //drawObject(car);
+    
+    int left, right, down, top;
+    
+    left = getLeft(car);
+    right = getRight(car);
+    down = getDown(car);
+    top = getTop(car);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, tex_ID);
+
+    glBegin(GL_POLYGON);
+        glTexCoord2d(0, 0); glVertex2i(left, down);
+        glTexCoord2d(0, 1); glVertex2i(left, top);
+        glTexCoord2d(1, 1); glVertex2i(right, top);
+        glTexCoord2d(1, 0); glVertex2i(right, down);
+    glEnd();
+    
+    glDisable(GL_TEXTURE_2D);
     
     count++;
     
