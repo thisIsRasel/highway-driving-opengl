@@ -1,22 +1,12 @@
 # depslib dependency file v1.0
-1522262036 source:f:\car driving\main.cpp
+1524943369 source:f:\highway driving\main.cpp
+	<windows.h>
 	<GL/gl.h>
 	<GL/glut.h>
 	<stdlib.h>
 	<iostream>
 	<time.h>
 	"SOIL.h"
-
-1517164928 c:\program files (x86)\codeblocks\mingw\include\gl\glut.h
-	"freeglut_std.h"
-
-1517164928 c:\program files (x86)\codeblocks\mingw\include\gl\freeglut_std.h
-	<windows.h>
-	<OpenGL/gl.h>
-	<OpenGL/glu.h>
-	<GL/gl.h>
-	<GL/glu.h>
-	<stdlib.h>
 
 1228530732 c:\program files (x86)\codeblocks\mingw\include\windows.h
 	<winresrc.h>
@@ -223,6 +213,17 @@
 	<objfwd.h>
 
 1228530734 c:\program files (x86)\codeblocks\mingw\include\gl\gl.h
+
+1517164928 c:\program files (x86)\codeblocks\mingw\include\gl\glut.h
+	"freeglut_std.h"
+
+1517164928 c:\program files (x86)\codeblocks\mingw\include\gl\freeglut_std.h
+	<windows.h>
+	<OpenGL/gl.h>
+	<OpenGL/glu.h>
+	<GL/gl.h>
+	<GL/glu.h>
+	<stdlib.h>
 
 1228530734 c:\program files (x86)\codeblocks\mingw\include\gl\glu.h
 	<stddef.h>
